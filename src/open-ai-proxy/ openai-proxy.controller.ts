@@ -53,15 +53,16 @@ export class OpenAiProxyController {
       //   chunks.push(chunk);
       // });
       //
-      // response.on('end', function () {
-      //   const body = Buffer.concat(chunks);
-      //   // console.log(body.toString());
-      //   res.json(JSON.parse(body.toString()));
-      // });
+      response.on('end', function () {
+        console.log('ended');
+        // const body = Buffer.concat(chunks);
+        // // console.log(body.toString());
+        // res.json(JSON.parse(body.toString()));
+      });
       //
-      // response.on('error', function (error) {
-      //   console.error(error);
-      // });
+      response.on('error', function (error) {
+        console.error(error);
+      });
     });
 
     request.on('error', (err) => {
