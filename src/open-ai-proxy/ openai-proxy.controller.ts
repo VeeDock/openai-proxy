@@ -13,7 +13,7 @@ export class OpenAiProxyController {
 
   constructor() {}
 
-  @All()
+  @All('*proxy')
   async proxy(@Req() req: Request, @Res() res: Response) {
     const targetUrl = `${this.openaiBase}${req.url}`;
 
