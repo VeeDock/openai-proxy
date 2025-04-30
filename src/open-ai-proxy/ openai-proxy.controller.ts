@@ -40,6 +40,7 @@ export class OpenAiProxyController {
       // SSE поддержка
       if (response.headers['content-type']?.includes('text/event-stream')) {
         res.setHeader('Content-Type', 'text/event-stream');
+        console.log('stream')
         response.data.pipe(res);
       } else {
         console.log('send response', response.data)
