@@ -6,8 +6,8 @@ import { Request, Response } from 'express';
 // import OpenAI from 'openai';
 // import { FinalRequestOptions } from 'openai/core';
 // import * as QueryString from 'node:querystring';
-// import * as https from 'node:https';
-import { https } from 'follow-redirects';
+import * as https from 'node:https';
+// import { https } from 'follow-redirects';
 
 @Controller('v1')
 export class OpenAiProxyController {
@@ -47,11 +47,14 @@ export class OpenAiProxyController {
 
       res.writeHead(response.statusCode || 500, response.headers);
 
-      response.pipe(res);
+      // response.pipe(res, { end: true });
+      // response.pipe(process.stdout);
 
-      // response.on('data', function (chunk) {
-      //   chunks.push(chunk);
-      // });
+      response.on('data', function (chunk) {
+        // chunks.push(chunk);
+        // console.log('data..');
+        res.write(chunk);
+      });
       //
       response.on('end', function () {
         console.log('ended');
