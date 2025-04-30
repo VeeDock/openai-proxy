@@ -1,9 +1,4 @@
-import {
-  Controller,
-  Req,
-  Res,
-  All,
-} from '@nestjs/common';
+import { Controller, Req, Res, All } from '@nestjs/common';
 import { Request, Response } from 'express';
 import axios from 'axios';
 
@@ -17,14 +12,15 @@ export class OpenAiProxyController {
   async proxy(@Req() req: Request, @Res() res: Response) {
     const targetUrl = `${this.openaiBase}${req.url}`;
 
-    console.log('targeturl', targetUrl);
+    console.log('method', req.method)
+    console.log('url', targetUrl);
+    console.log('body', req.body);
 
     try {
       const headers = {
         ...req.headers,
         host: 'api.openai.com',
       };
-
 
       const response = await axios({
         method: req.method as any,
@@ -40,10 +36,10 @@ export class OpenAiProxyController {
       // SSE поддержка
       if (response.headers['content-type']?.includes('text/event-stream')) {
         res.setHeader('Content-Type', 'text/event-stream');
-        console.log('stream')
+        console.log('stream');
         response.data.pipe(res);
       } else {
-        console.log('send response')
+        console.log('send response');
         res.status(response.status).json(response.data);
       }
     } catch (err) {
