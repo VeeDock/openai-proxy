@@ -43,7 +43,7 @@ export class OpenAiProxyController {
         console.log('stream')
         response.data.pipe(res);
       } else {
-        console.log('send response', response.data)
+        console.log('send response')
         res.status(response.status).json(response.data);
       }
     } catch (err) {
