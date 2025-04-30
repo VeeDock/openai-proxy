@@ -8,6 +8,26 @@ import { Request, Response } from 'express';
 // import * as QueryString from 'node:querystring';
 import * as https from 'node:https';
 // import { https } from 'follow-redirects';
+import { IncomingHttpHeaders } from 'http';
+
+function normalizeHeaders(headers: IncomingHttpHeaders): Map<string, string> {
+  const normalized: Map<string, string> = new Map();
+
+  for (const [key, value] of Object.entries(headers)) {
+    if (typeof value === 'string') {
+      normalized[key] = value;
+      normalized.set(key, value);
+    } else if (Array.isArray(value)) {
+      normalized[key] = value.join(','); // или берёшь value[0], если нужен один
+      normalized.set(key, value.join(','));
+    } else if (typeof value === 'number') {
+      // normalized[key] = value.toString();
+      normalized.set(key, value);
+    }
+  }
+
+  return normalized;
+}
 
 @Controller('v1')
 export class OpenAiProxyController {
@@ -45,24 +65,28 @@ export class OpenAiProxyController {
     const request = https.request(options, function (response) {
       const chunks: Array<any> = [];
 
-      res.writeHead(response.statusCode || 500, response.headers);
-      res.flushHeaders();
+      // res.writeHead(response.statusCode || 500, response.headers);
+      // res.flushHeaders();
 
       // response.pipe(res, { end: true });
       // response.pipe(process.stdout);
 
       response.on('data', function (chunk) {
-        // chunks.push(chunk);
+        chunks.push(chunk);
         console.log('data..');
-        res.write(chunk);
+        // res.write(chunk);
       });
       //
       response.on('end', function () {
         console.log('ended!');
-        res.json();
-        // const body = Buffer.concat(chunks);
-        // // console.log(body.toString());
-        // res.json(JSON.parse(body.toString()));
+        // res.json();
+        const body = Buffer.concat(chunks);
+        // console.log(body.toString());
+        // console.log('headers', response.headers);
+        res
+          .status(response.statusCode || 500)
+          .setHeaders(normalizeHeaders(response.headers))
+          .json(JSON.parse(body.toString()));
       });
       //
       response.on('error', function (error) {
