@@ -40,21 +40,32 @@ export class OpenAiProxyController {
     };
 
     const request = https.request(options, function (response) {
-      const chunks: Array<any> = [];
+      // const chunks: Array<any> = [];
 
-      response.on('data', function (chunk) {
-        chunks.push(chunk);
-      });
+      res.writeHead(response.statusCode || 500, response.headers);
 
-      response.on('end', function () {
-        const body = Buffer.concat(chunks);
-        // console.log(body.toString());
-        res.status(response.statusCode).json(JSON.parse(body.toString()));
-      });
+      response.pipe(res, { end: true });
 
-      response.on('error', function (error) {
-        console.error(error);
-      });
+      // response.on('data', function (chunk) {
+      //   chunks.push(chunk);
+      // });
+      //
+      // response.on('end', function () {
+      //   const body = Buffer.concat(chunks);
+      //   // console.log(body.toString());
+      //   res.json(JSON.parse(body.toString()));
+      // });
+      //
+      // response.on('error', function (error) {
+      //   console.error(error);
+      // });
+    });
+
+    request.on('error', (err) => {
+      console.error('Proxy error:', err);
+      res
+        .status(500)
+        .json({ error: 'Proxy request failed', details: err.message });
     });
 
     // let postData = JSON.stringify({
@@ -69,8 +80,11 @@ export class OpenAiProxyController {
     //   },
     // });
 
-    if (req.body) {
-      request.write(JSON.stringify(req.body));
+    // if (req.body) {
+    //   request.write(JSON.stringify(req.body));
+    // }
+    if (req.readable) {
+      req.pipe(request);
     }
 
     request.end();
