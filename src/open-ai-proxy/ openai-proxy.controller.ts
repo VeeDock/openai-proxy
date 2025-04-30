@@ -52,12 +52,12 @@ export class OpenAiProxyController {
 
       response.on('data', function (chunk) {
         // chunks.push(chunk);
-        // console.log('data..');
+        console.log('data..');
         res.write(chunk);
       });
       //
       response.on('end', function () {
-        console.log('ended');
+        console.log('ended!');
         res.end();
         // const body = Buffer.concat(chunks);
         // // console.log(body.toString());
