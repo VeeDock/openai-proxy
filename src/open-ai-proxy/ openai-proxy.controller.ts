@@ -7,9 +7,9 @@ import {
 import { Request, Response } from 'express';
 import axios from 'axios';
 
-@Controller('openai-proxy')
+@Controller('v1')
 export class OpenAiProxyController {
-  private readonly openaiBase = 'https://api.openai.com/v1';
+  private readonly openaiBase = 'https://api.openai.com';
 
   constructor() {}
 
@@ -17,11 +17,14 @@ export class OpenAiProxyController {
   async proxy(@Req() req: Request, @Res() res: Response) {
     const targetUrl = `${this.openaiBase}${req.url}`;
 
+    console.log('targeturl', targetUrl);
+
     try {
       const headers = {
         ...req.headers,
         host: 'api.openai.com',
       };
+
 
       const response = await axios({
         method: req.method as any,
@@ -31,6 +34,8 @@ export class OpenAiProxyController {
         responseType:
           req.headers.accept === 'text/event-stream' ? 'stream' : 'json',
       });
+
+      console.log('response', response)
 
       // SSE поддержка
       if (response.headers['content-type']?.includes('text/event-stream')) {
