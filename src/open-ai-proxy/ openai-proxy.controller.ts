@@ -29,9 +29,8 @@ export class OpenAiProxyController {
         ...req.headers,
         host: 'api.openai.com',
       };
-      if ('set-cookie' in headers) {
-        delete headers['set-cookie'];
-      }
+
+      // console.log('headers', headers);
 
       const conf: FinalRequestOptions<any> = {
         method: req.method as any,
@@ -39,19 +38,21 @@ export class OpenAiProxyController {
         headers: {
           Host: 'api.openai.com',
           Authorization: headers.authorization,
-          'OpenAI-Beta': headers['OpenAI-Beta'],
-          'Content-Type': headers['Content-Type'],
+          'OpenAI-Beta': headers['openai-beta'],
+          'Content-Type': headers['content-type'],
         },
         // data: req.body,
         // responseType:
         //   req.headers.accept === 'text/event-stream' ? 'stream' : 'json',
       };
 
+      // console.log('conf', conf);
+
       const response = await this.openai.request<
         Request<any>,
         Response<Response>
       >(conf);
-      console.log('response', response);
+      // console.log('response', response);
 
       // const response = await axios();
 
