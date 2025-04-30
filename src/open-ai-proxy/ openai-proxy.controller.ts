@@ -7,7 +7,7 @@ import { Request, Response } from 'express';
 // import { FinalRequestOptions } from 'openai/core';
 // import * as QueryString from 'node:querystring';
 // import * as https from 'node:https';
-import { http } from 'follow-redirects';
+import { https } from 'follow-redirects';
 
 @Controller('v1')
 export class OpenAiProxyController {
@@ -39,7 +39,7 @@ export class OpenAiProxyController {
       maxRedirects: 20,
     };
 
-    const request = http.request(options, function (response) {
+    const request = https.request(options, function (response) {
       const chunks: Array<any> = [];
 
       response.on('data', function (chunk) {
