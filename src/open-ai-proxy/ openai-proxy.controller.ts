@@ -59,7 +59,7 @@ export class OpenAiProxyController {
       //
       response.on('end', function () {
         console.log('ended!');
-        res.end();
+        res.json();
         // const body = Buffer.concat(chunks);
         // // console.log(body.toString());
         // res.json(JSON.parse(body.toString()));
