@@ -35,13 +35,14 @@ export class OpenAiProxyController {
           req.headers.accept === 'text/event-stream' ? 'stream' : 'json',
       });
 
-      console.log('response', response)
+      // console.log('response', response)
 
       // SSE поддержка
       if (response.headers['content-type']?.includes('text/event-stream')) {
         res.setHeader('Content-Type', 'text/event-stream');
         response.data.pipe(res);
       } else {
+        console.log('send response', response.data)
         res.status(response.status).json(response.data);
       }
     } catch (err) {
