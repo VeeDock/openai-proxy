@@ -31,20 +31,23 @@ export class OpenAiProxyController {
       hostname: this.openaiHost,
       path,
       headers: {
-        Authorization: req.headers['authorization'],
-        'OpenAI-Beta': req.headers['openai-beta'],
+        Authorization: req.headers['authorization'] || '',
         Host: 'api.openai.com',
-        'Content-Type': req.headers['content-type'],
+        'Content-Type': req.headers['content-type'] || '',
       },
       maxRedirects: 20,
     };
 
+    if (req.headers['openai-beta']) {
+      options.headers['openai-beta'] = req.headers['openai-beta'];
+    }
+
     const request = https.request(options, function (response) {
-      // const chunks: Array<any> = [];
+      const chunks: Array<any> = [];
 
       res.writeHead(response.statusCode || 500, response.headers);
 
-      response.pipe(res, { end: true });
+      response.pipe(res);
 
       // response.on('data', function (chunk) {
       //   chunks.push(chunk);
