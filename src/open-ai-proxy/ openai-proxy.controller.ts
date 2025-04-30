@@ -52,7 +52,7 @@ export class OpenAiProxyController {
         Request<any>,
         Response<Response>
       >(conf);
-      // console.log('response', response);
+      console.log('response', response);
 
       // const response = await axios();
 
