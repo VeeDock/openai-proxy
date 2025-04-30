@@ -1,74 +1,78 @@
 import { Controller, Req, Res, All } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { HttpService } from '@nestjs/axios';
-import { firstValueFrom } from 'rxjs';
-import axios, { AxiosRequestConfig } from 'axios';
-import OpenAI from 'openai';
-import { FinalRequestOptions } from 'openai/core';
-import * as QueryString from 'node:querystring';
+// import { HttpService } from '@nestjs/axios';
+// import { firstValueFrom } from 'rxjs';
+// import axios, { AxiosRequestConfig } from 'axios';
+// import OpenAI from 'openai';
+// import { FinalRequestOptions } from 'openai/core';
+// import * as QueryString from 'node:querystring';
+// import * as https from 'node:https';
+import { http } from 'follow-redirects';
 
 @Controller('v1')
 export class OpenAiProxyController {
-  private readonly openaiBase = 'https://api.openai.com';
-  private openai: OpenAI;
+  // private readonly openaiBase = 'https://api.openai.com';
+  private readonly openaiHost = 'api.openai.com';
 
-  constructor(private readonly httpService: HttpService) {
-    this.openai = new OpenAI({ apiKey: '' });
-  }
+  constructor() {}
 
   @All('*proxy')
-  async proxy(@Req() req: Request, @Res() res: Response) {
-    const targetUrl = `${this.openaiBase}${req.url}`;
+  proxy(@Req() req: Request, @Res() res: Response) {
+    const path = req.url;
 
     console.log('method', req.method);
-    console.log('url', targetUrl);
+    console.log('url', path);
     console.log('body', req.body);
 
-    try {
-      const headers = {
-        ...req.headers,
-        host: 'api.openai.com',
-      };
+    // const isStream = req.headers.accept === 'text/event-stream';
 
-      // console.log('headers', headers);
+    const options = {
+      method: req.method,
+      hostname: this.openaiHost,
+      path,
+      headers: {
+        Authorization: req.headers['authorization'],
+        'OpenAI-Beta': req.headers['openai-beta'],
+        Host: 'api.openai.com',
+        'Content-Type': req.headers['content-type'],
+      },
+      maxRedirects: 20,
+    };
 
-      const conf: FinalRequestOptions<any> = {
-        method: req.method as any,
-        path: targetUrl,
-        headers: {
-          Host: 'api.openai.com',
-          Authorization: headers.authorization,
-          'OpenAI-Beta': headers['openai-beta'],
-          'Content-Type': headers['content-type'],
-        },
-        // data: req.body,
-        // responseType:
-        //   req.headers.accept === 'text/event-stream' ? 'stream' : 'json',
-      };
+    const request = http.request(options, function (response) {
+      const chunks: Array<any> = [];
 
-      // console.log('conf', conf);
+      response.on('data', function (chunk) {
+        chunks.push(chunk);
+      });
 
-      const response = await this.openai.request<
-        Request<any>,
-        Response<Response>
-      >(conf);
-      console.log('response', response);
+      response.on('end', function () {
+        const body = Buffer.concat(chunks);
+        // console.log(body.toString());
+        res.status(response.statusCode).json(JSON.parse(body.toString()));
+      });
 
-      // const response = await axios();
+      response.on('error', function (error) {
+        console.error(error);
+      });
+    });
 
-      // SSE поддержка
-      if (response.header['content-type']?.includes('text/event-stream')) {
-        res.setHeader('Content-Type', 'text/event-stream');
-        // @ts-ignore
-        response.data.pipe(res);
-      } else {
-        // @ts-ignore
-        res.status(response.status).json(response.data);
-      }
-    } catch (err) {
-      const status = err.response?.status || 500;
-      const message = err.response?.data || err.message || 'Proxy Error';
-      res.status(status).json({ error: message });
+    // let postData = JSON.stringify({
+    //   messages: [
+    //     {
+    //       role: 'assistant',
+    //       content: 'hello my friend2!',
+    //     },
+    //   ],
+    //   metadata: {
+    //     assistant_id: 'asst_AEsyidHxgJgV0dSkLPa1hgWe',
+    //   },
+    // });
+
+    if (req.body) {
+      request.write(JSON.stringify(req.body));
     }
+
+    request.end();
   }
 }
