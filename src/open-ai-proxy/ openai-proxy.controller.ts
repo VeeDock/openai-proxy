@@ -67,10 +67,11 @@ export class OpenAiProxyController {
     const chunks: Array<any> = [];
     const response = await new Promise<http.IncomingMessage>((resolve) => {
       const request = https.request(options, function (response) {
-        res
-          .status(response.statusCode || 500)
-          .setHeaders(normalizeHeaders(response.headers));
-        // response.pipe(res, { end: true });
+        // res
+        //   .status(response.statusCode || 500)
+        //   .setHeaders(normalizeHeaders(response.headers));
+        response.pipe(res);
+        // res.flushHeaders();
         resolve(response);
         return;
         const chunks: Array<any> = [];
@@ -118,25 +119,14 @@ export class OpenAiProxyController {
           .json({ error: 'Proxy request failed', details: err.message });
       });
 
-      // let postData = JSON.stringify({
-      //   messages: [
-      //     {
-      //       role: 'assistant',
-      //       content: 'hello my friend2!',
-      //     },
-      //   ],
-      //   metadata: {
-      //     assistant_id: 'asst_AEsyidHxgJgV0dSkLPa1hgWe',
-      //   },
-      // });
+      request.on('close', () => {
+        console.log('request closed');
+        res.end();
+      });
 
       if (req.body) {
         request.write(JSON.stringify(req.body));
       }
-      // if (req.readable) {
-      //   req.pipe(request);
-      // }
-
       request.end();
     });
 
