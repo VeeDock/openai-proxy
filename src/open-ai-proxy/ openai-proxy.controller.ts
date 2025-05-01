@@ -83,10 +83,16 @@ export class OpenAiProxyController {
         const body = Buffer.concat(chunks);
         // console.log(body.toString());
         // console.log('headers', response.headers);
+        let data = body.toString();
+        try {
+          data = JSON.parse(data);
+        } catch {
+          /* empty */
+        }
         res
           .status(response.statusCode || 500)
           .setHeaders(normalizeHeaders(response.headers))
-          .json(JSON.parse(body.toString()));
+          [typeof data === 'string' ? 'send' : 'json'](data);
       });
       //
       response.on('error', function (error) {
