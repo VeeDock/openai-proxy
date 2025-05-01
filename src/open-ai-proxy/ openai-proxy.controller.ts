@@ -77,9 +77,10 @@ export class OpenAiProxyController {
 
       const isStream =
         response.headers['content-type']?.indexOf('text/event-stream') != -1;
+      // const isStream = true;
 
-      // res.setHeader('Connection', 'keep-alive');
-      // response.headers['content-type'] = 'text/event-stream';
+      res.setHeader('Connection', 'keep-alive');
+      response.headers['content-type'] = 'text/event-stream';
       res.writeHead(response.statusCode || 500, response.headers);
       if (isStream) {
         res.flushHeaders();
@@ -93,13 +94,18 @@ export class OpenAiProxyController {
         if (!isStream) {
           chunks.push(chunk);
         } else {
+          response.pipe(res);
           // console.log('chunk', chunk.toString());
-          data += chunk.toString();
-          if (/\n\n$/.test(data)) {
-            console.log('send: ', data);
-            res.write(data);
-            data = '';
-          }
+          // setInterval(() => {
+          //   res.write('event: ev\n');
+          //   res.write('data: messaggggg\n\n');
+          // }, 500);
+          // data += chunk.toString();
+          // if (/\n\n$/.test(data)) {
+          //   console.log('send: ', data);
+          //   res.write(data);
+          //   data = '';
+          // }
         }
 
         // console.log('data..', chunk.toString());
@@ -115,7 +121,7 @@ export class OpenAiProxyController {
           res.write(body.toString());
         }
         // res.json();
-        res.end();
+        // res.end();
         // const body = Buffer.concat(chunks);
         // // console.log(body.toString());
         // // console.log('headers', response.headers);
