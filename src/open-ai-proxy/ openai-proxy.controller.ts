@@ -65,32 +65,36 @@ export class OpenAiProxyController {
     }
 
     const request = https.request(options, function (response) {
-      res
-        .status(response.statusCode || 500)
-        .setHeaders(normalizeHeaders(response.headers));
-      res.flushHeaders();
+      // res
+      //   .status(response.statusCode || 500)
+      //   .setHeaders(normalizeHeaders(response.headers));
+      // res.flushHeaders();
       // response.pipe(res);
       // res.flushHeaders();
 
       const chunks: Array<any> = [];
-      //
-      // // res.writeHead(response.statusCode || 500, response.headers);
-      // // res.flushHeaders();
+
+      // res.setHeader('Connection', 'keep-alive');
+      // response.headers['content-type'] = 'text/event-stream';
+      res.writeHead(response.statusCode || 500, response.headers);
+
+      res.flushHeaders();
       //
       // // response.pipe(res, { end: true });
       // // response.pipe(process.stdout);
       //
       response.on('data', function (chunk) {
         chunks.push(chunk);
-        console.log('data..', chunk.toString());
-        res.write(chunk);
-        // res.wr
+        // console.log('data..', chunk.toString());
+        // res.write('data: ' + chunk.toString());
+        // res.write('data: memessage\n\n');
+        res.write(chunk.toString());
       });
       // //
       response.on('end', function () {
         console.log('ended!');
         // res.json();
-        res.end(console.log);
+        res.end();
         // const body = Buffer.concat(chunks);
         // // console.log(body.toString());
         // // console.log('headers', response.headers);
@@ -122,7 +126,6 @@ export class OpenAiProxyController {
 
     request.on('close', () => {
       console.log('request closed');
-      res.end();
     });
 
     if (req.body) {
