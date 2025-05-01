@@ -74,7 +74,7 @@ export class OpenAiProxyController {
       response.on('data', function (chunk) {
         chunks.push(chunk);
         console.log('data..', chunk.toString());
-        res.write(chunk);
+        // res.write(chunk);
       });
       //
       response.on('end', function () {
