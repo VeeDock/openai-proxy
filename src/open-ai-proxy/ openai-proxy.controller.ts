@@ -73,7 +73,7 @@ export class OpenAiProxyController {
 
       response.on('data', function (chunk) {
         chunks.push(chunk);
-        console.log('data..');
+        // console.log('data..');
         // res.write(chunk);
       });
       //
@@ -113,12 +113,12 @@ export class OpenAiProxyController {
     //   },
     // });
 
-    // if (req.body) {
-    //   request.write(JSON.stringify(req.body));
-    // }
-    if (req.readable) {
-      req.pipe(request);
+    if (req.body) {
+      request.write(JSON.stringify(req.body));
     }
+    // if (req.readable) {
+    //   req.pipe(request);
+    // }
 
     request.end();
   }
