@@ -89,6 +89,7 @@ export class OpenAiProxyController {
         // res.write('data: ' + chunk.toString());
         // res.write('data: memessage\n\n');
         res.write(chunk.toString());
+        (res as any).flush?.();
       });
       // //
       response.on('end', function () {
