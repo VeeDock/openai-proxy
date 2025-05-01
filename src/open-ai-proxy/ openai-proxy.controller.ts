@@ -39,7 +39,7 @@ export class OpenAiProxyController {
   constructor() {}
 
   @All('*proxy')
-  async proxy(@Req() req: Request, @Res() res: Response) {
+  proxy(@Req() req: Request, @Res() res: Response) {
     const path = req.url;
 
     console.log('method', req.method);
@@ -64,108 +64,67 @@ export class OpenAiProxyController {
       options.headers['openai-beta'] = req.headers['openai-beta'];
     }
 
-    const chunks: Array<any> = [];
-    const response = await new Promise<http.IncomingMessage>((resolve) => {
-      const request = https.request(options, function (response) {
-        // res
-        //   .status(response.statusCode || 500)
-        //   .setHeaders(normalizeHeaders(response.headers));
-        response.pipe(res);
-        // res.flushHeaders();
-        resolve(response);
-        return;
-        const chunks: Array<any> = [];
+    const request = https.request(options, function (response) {
+      // res
+      //   .status(response.statusCode || 500)
+      //   .setHeaders(normalizeHeaders(response.headers));
+      response.pipe(res);
+      // res.flushHeaders();
 
-        // res.writeHead(response.statusCode || 500, response.headers);
-        // res.flushHeaders();
-
-        // response.pipe(res, { end: true });
-        // response.pipe(process.stdout);
-
-        response.on('data', function (chunk) {
-          chunks.push(chunk);
-          console.log('data..', chunk.toString());
-          // res.write(chunk);
-        });
-        //
-        response.on('end', function () {
-          console.log('ended!');
-          // res.json();
-          const body = Buffer.concat(chunks);
-          // console.log(body.toString());
-          // console.log('headers', response.headers);
-          let data = body.toString();
-          try {
-            data = JSON.parse(data);
-          } catch {
-            /* empty */
-          }
-          // console.log('method', typeof data === 'string' ? 'send' : 'json');
-          res
-            .status(response.statusCode || 500)
-            .setHeaders(normalizeHeaders(response.headers))
-            [typeof data === 'string' ? 'send' : 'json'](data);
-        });
-        //
-        response.on('error', function (error) {
-          console.error(error);
-        });
-      });
-
-      request.on('error', (err) => {
-        console.error('Proxy error:', err);
-        res
-          .status(500)
-          .json({ error: 'Proxy request failed', details: err.message });
-      });
-
-      request.on('close', () => {
-        console.log('request closed');
+      // const chunks: Array<any> = [];
+      //
+      // // res.writeHead(response.statusCode || 500, response.headers);
+      // // res.flushHeaders();
+      //
+      // // response.pipe(res, { end: true });
+      // // response.pipe(process.stdout);
+      //
+      // response.on('data', function (chunk) {
+      //   chunks.push(chunk);
+      //   console.log('data..', chunk.toString());
+      //   // res.write(chunk);
+      // });
+      // //
+      // response.on('end', function () {
+      //   console.log('ended!');
+      //   // res.json();
+      //   const body = Buffer.concat(chunks);
+      //   // console.log(body.toString());
+      //   // console.log('headers', response.headers);
+      //   let data = body.toString();
+      //   try {
+      //     data = JSON.parse(data);
+      //   } catch {
+      //     /* empty */
+      //   }
+      //   // console.log('method', typeof data === 'string' ? 'send' : 'json');
+      //   res
+      //     .status(response.statusCode || 500)
+      //     .setHeaders(normalizeHeaders(response.headers))
+      //     [typeof data === 'string' ? 'send' : 'json'](data);
+      // });
+      //
+      response.on('error', function (error) {
+        console.error(error);
         res.end();
       });
-
-      if (req.body) {
-        request.write(JSON.stringify(req.body));
-      }
-      request.end();
     });
 
-    // console.log('headers', response.headers);
+    request.on('error', (err) => {
+      console.error('Proxy error:', err);
+      res
+        .status(500)
+        .json({ error: 'Proxy request failed', details: err.message });
+    });
 
-    //test
-    // res.setHeader('Content-Type', 'text/event-stream');
-    // res.setHeader('Transfer-Encoding', 'chunked');
+    request.on('close', () => {
+      console.log('request closed');
+      res.end();
+    });
 
-    // return new Observable((observer) => {
-    //   setTimeout(() => {
-    //     observer.next({ data: 'test', type: 'example' });
-    //   }, 1000);
-    // });
-    //
-    response.on('data', function (chunk) {
-      chunks.push(chunk);
-      console.log('data..', chunk.toString());
-      // res.write(chunk);
-    });
-    //
-    response.on('end', function () {
-      console.log('ended!');
-      // res.json();
-      const body = Buffer.concat(chunks);
-      // console.log(body.toString());
-      // console.log('headers', response.headers);
-      let data = body.toString();
-      try {
-        data = JSON.parse(data);
-      } catch {
-        /* empty */
-      }
-      // console.log('method', typeof data === 'string' ? 'send' : 'json');
-      res[typeof data === 'string' ? 'send' : 'json'](data);
-    });
-    //
-    response.on('error', function (error) {
-      console.error(error);
-    });
+    if (req.body) {
+      request.write(JSON.stringify(req.body));
+    }
+    request.end();
   }
 }
