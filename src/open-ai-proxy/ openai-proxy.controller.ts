@@ -31,6 +31,16 @@ function normalizeHeaders(headers: IncomingHttpHeaders): Map<string, string> {
   return normalized;
 }
 
+function sendMessage(res: Response, mes: string) {
+  const ok = res.write(mes);
+  if (!ok) {
+    res.once('drain', () => {
+      console.log('try again');
+      sendMessage(res, mes);
+    });
+  }
+}
+
 @Controller('v1')
 export class OpenAiProxyController {
   // private readonly openaiBase = 'https://api.openai.com';
@@ -79,13 +89,11 @@ export class OpenAiProxyController {
         response.headers['content-type']?.indexOf('text/event-stream') != -1;
       // const isStream = true;
 
-      res.setHeader('Connection', 'keep-alive');
-      response.headers['content-type'] = 'text/event-stream';
+      // res.setHeader('Connection', 'keep-alive');
+      // response.headers['content-type'] = 'text/event-stream';
       res.writeHead(response.statusCode || 500, response.headers);
       if (isStream) {
         res.flushHeaders();
-        response.pipe(res);
-        return;
       }
 
       //
@@ -102,12 +110,13 @@ export class OpenAiProxyController {
           //   res.write('event: ev\n');
           //   res.write('data: messaggggg\n\n');
           // }, 500);
-          // data += chunk.toString();
-          // if (/\n\n$/.test(data)) {
-          //   console.log('send: ', data);
-          //   res.write(data);
-          //   data = '';
-          // }
+          data += chunk.toString();
+          if (/\n\n$/.test(data)) {
+            // queue.push(data);
+            console.log('send', data);
+            sendMessage(res, data);
+            data = '';
+          }
         }
 
         // console.log('data..', chunk.toString());
@@ -123,7 +132,7 @@ export class OpenAiProxyController {
           res.write(body.toString());
         }
         // res.json();
-        // res.end();
+        res.end();
         // const body = Buffer.concat(chunks);
         // // console.log(body.toString());
         // // console.log('headers', response.headers);
