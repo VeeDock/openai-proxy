@@ -73,6 +73,7 @@ export class OpenAiProxyController {
       // res.flushHeaders();
 
       const chunks: Array<any> = [];
+      let data = '';
 
       const isStream =
         response.headers['content-type']?.indexOf('text/event-stream') != -1;
@@ -92,8 +93,18 @@ export class OpenAiProxyController {
         if (!isStream) {
           chunks.push(chunk);
         } else {
-          console.log('chunk', chunk.toString());
-          res.write(chunk.toString());
+          // console.log('chunk', chunk.toString());
+          data += chunk.toString();
+          const messages = data.split('\n');
+          if (
+            messages.length >= 2 &&
+            /^event:/.test(messages[0]) &&
+            /^data:/.test(messages[1])
+          ) {
+            console.log('send: ', data);
+            res.write(data);
+            data = '';
+          }
         }
 
         // console.log('data..', chunk.toString());
