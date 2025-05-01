@@ -95,12 +95,7 @@ export class OpenAiProxyController {
         } else {
           // console.log('chunk', chunk.toString());
           data += chunk.toString();
-          const messages = data.split('\n');
-          if (
-            messages.length >= 2 &&
-            /^event:/.test(messages[0]) &&
-            /^data:/.test(messages[1])
-          ) {
+          if (/\n\n$/.test(data)) {
             console.log('send: ', data);
             res.write(data);
             data = '';
