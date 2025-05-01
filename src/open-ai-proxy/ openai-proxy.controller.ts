@@ -89,7 +89,7 @@ export class OpenAiProxyController {
         } catch {
           /* empty */
         }
-        console.log('method', typeof data === 'string' ? 'send' : 'json');
+        // console.log('method', typeof data === 'string' ? 'send' : 'json');
         res
           .status(response.statusCode || 500)
           .setHeaders(normalizeHeaders(response.headers))
