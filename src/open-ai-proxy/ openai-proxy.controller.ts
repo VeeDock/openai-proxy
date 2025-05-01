@@ -9,6 +9,7 @@ import { Request, Response } from 'express';
 import * as https from 'node:https';
 // import { https } from 'follow-redirects';
 import { IncomingHttpHeaders } from 'http';
+import { Observable } from 'rxjs';
 
 function normalizeHeaders(headers: IncomingHttpHeaders): Map<string, string> {
   const normalized: Map<string, string> = new Map();
@@ -128,5 +129,11 @@ export class OpenAiProxyController {
     // }
 
     request.end();
+
+    return new Observable<void>((observer) => {
+      res.on('close', () => {
+        observer.complete();
+      });
+    });
   }
 }
