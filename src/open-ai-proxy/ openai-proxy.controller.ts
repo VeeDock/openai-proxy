@@ -71,34 +71,34 @@ export class OpenAiProxyController {
       response.pipe(res, { end: true });
       // response.pipe(process.stdout);
 
-      response.on('data', function (chunk) {
-        chunks.push(chunk);
-        console.log('data..', chunk.toString());
-        // res.write(chunk);
-      });
-      //
-      response.on('end', function () {
-        console.log('ended!');
-        // res.json();
-        const body = Buffer.concat(chunks);
-        // console.log(body.toString());
-        // console.log('headers', response.headers);
-        let data = body.toString();
-        try {
-          data = JSON.parse(data);
-        } catch {
-          /* empty */
-        }
-        console.log('method', typeof data === 'string' ? 'send' : 'json');
-        res
-          .status(response.statusCode || 500)
-          .setHeaders(normalizeHeaders(response.headers))
-          [typeof data === 'string' ? 'send' : 'json'](data);
-      });
-      //
-      response.on('error', function (error) {
-        console.error(error);
-      });
+      // response.on('data', function (chunk) {
+      //   chunks.push(chunk);
+      //   console.log('data..', chunk.toString());
+      //   // res.write(chunk);
+      // });
+      // //
+      // response.on('end', function () {
+      //   console.log('ended!');
+      //   // res.json();
+      //   const body = Buffer.concat(chunks);
+      //   // console.log(body.toString());
+      //   // console.log('headers', response.headers);
+      //   let data = body.toString();
+      //   try {
+      //     data = JSON.parse(data);
+      //   } catch {
+      //     /* empty */
+      //   }
+      //   console.log('method', typeof data === 'string' ? 'send' : 'json');
+      //   res
+      //     .status(response.statusCode || 500)
+      //     .setHeaders(normalizeHeaders(response.headers))
+      //     [typeof data === 'string' ? 'send' : 'json'](data);
+      // });
+      // //
+      // response.on('error', function (error) {
+      //   console.error(error);
+      // });
     });
 
     request.on('error', (err) => {
