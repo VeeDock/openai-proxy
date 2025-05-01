@@ -68,7 +68,7 @@ export class OpenAiProxyController {
       // res.writeHead(response.statusCode || 500, response.headers);
       // res.flushHeaders();
 
-      // response.pipe(res, { end: true });
+      response.pipe(res, { end: true });
       // response.pipe(process.stdout);
 
       response.on('data', function (chunk) {
