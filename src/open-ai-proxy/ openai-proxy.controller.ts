@@ -87,24 +87,25 @@ export class OpenAiProxyController {
         // res.wr
       });
       // //
-      // response.on('end', function () {
-      //   console.log('ended!');
-      //   // res.json();
-      //   const body = Buffer.concat(chunks);
-      //   // console.log(body.toString());
-      //   // console.log('headers', response.headers);
-      //   let data = body.toString();
-      //   try {
-      //     data = JSON.parse(data);
-      //   } catch {
-      //     /* empty */
-      //   }
-      //   // console.log('method', typeof data === 'string' ? 'send' : 'json');
-      //   res
-      //     .status(response.statusCode || 500)
-      //     .setHeaders(normalizeHeaders(response.headers))
-      //     [typeof data === 'string' ? 'send' : 'json'](data);
-      // });
+      response.on('end', function () {
+        console.log('ended!');
+        // res.json();
+        res.end(console.log);
+        // const body = Buffer.concat(chunks);
+        // // console.log(body.toString());
+        // // console.log('headers', response.headers);
+        // let data = body.toString();
+        // try {
+        //   data = JSON.parse(data);
+        // } catch {
+        //   /* empty */
+        // }
+        // // console.log('method', typeof data === 'string' ? 'send' : 'json');
+        // res
+        //   .status(response.statusCode || 500)
+        //   .setHeaders(normalizeHeaders(response.headers))
+        //   [typeof data === 'string' ? 'send' : 'json'](data);
+      });
       //
       response.on('error', function (error) {
         console.error(error);
