@@ -70,7 +70,7 @@ export class OpenAiProxyController {
         res
           .status(response.statusCode || 500)
           .setHeaders(normalizeHeaders(response.headers));
-        response.pipe(res);
+        response.pipe(res, { end: true });
         resolve(response);
         return;
         const chunks: Array<any> = [];
