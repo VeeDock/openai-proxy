@@ -39,7 +39,7 @@ export class OpenAiProxyController {
   constructor() {}
 
   @All('*proxy')
-  async proxy(@Req() req: Request, @Res() res: Response) {
+  async proxy(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
     const path = req.url;
 
     console.log('method', req.method);
@@ -70,6 +70,7 @@ export class OpenAiProxyController {
         res
           .status(response.statusCode || 500)
           .setHeaders(normalizeHeaders(response.headers));
+        response.pipe(res);
         resolve(response);
         return;
         const chunks: Array<any> = [];
@@ -144,8 +145,6 @@ export class OpenAiProxyController {
     //test
     // res.setHeader('Content-Type', 'text/event-stream');
     // res.setHeader('Transfer-Encoding', 'chunked');
-
-    response.pipe(res);
 
     // return new Observable((observer) => {
     //   setTimeout(() => {
