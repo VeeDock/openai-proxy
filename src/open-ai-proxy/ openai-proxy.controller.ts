@@ -1,38 +1,32 @@
 import { Controller, Req, Res, All } from '@nestjs/common';
 import { Request, Response } from 'express';
-// import { HttpService } from '@nestjs/axios';
-// import { firstValueFrom } from 'rxjs';
-// import axios, { AxiosRequestConfig } from 'axios';
-// import OpenAI from 'openai';
-// import { FinalRequestOptions } from 'openai/core';
-// import * as QueryString from 'node:querystring';
 import * as https from 'node:https';
-// import { https } from 'follow-redirects';
-import { IncomingHttpHeaders } from 'http';
-import * as http from 'node:http';
-import { Observable } from 'rxjs';
 
-function normalizeHeaders(headers: IncomingHttpHeaders): Map<string, string> {
-  const normalized: Map<string, string> = new Map();
-
-  for (const [key, value] of Object.entries(headers)) {
-    if (typeof value === 'string') {
-      normalized[key] = value;
-      normalized.set(key, value);
-    } else if (Array.isArray(value)) {
-      normalized[key] = value.join(','); // или берёшь value[0], если нужен один
-      normalized.set(key, value.join(','));
-    } else if (typeof value === 'number') {
-      // normalized[key] = value.toString();
-      normalized.set(key, value);
-    }
-  }
-
-  return normalized;
-}
+// function normalizeHeaders(headers: IncomingHttpHeaders): Map<string, string> {
+//   const normalized: Map<string, string> = new Map();
+//
+//   for (const [key, value] of Object.entries(headers)) {
+//     if (typeof value === 'string') {
+//       normalized[key] = value;
+//       normalized.set(key, value);
+//     } else if (Array.isArray(value)) {
+//       normalized[key] = value.join(','); // или берёшь value[0], если нужен один
+//       normalized.set(key, value.join(','));
+//     } else if (typeof value === 'number') {
+//       // normalized[key] = value.toString();
+//       normalized.set(key, value);
+//     }
+//   }
+//
+//   return normalized;
+// }
 
 function sendMessage(res: Response, mes: string) {
-  const ok = res.write(mes);
+  const ok = res.write(mes, (err) => {
+    if (err) {
+      console.error('error write', err.message);
+    }
+  });
   if (!ok) {
     res.once('drain', () => {
       console.log('try again');
@@ -113,7 +107,7 @@ export class OpenAiProxyController {
           data += chunk.toString();
           if (/\n\n$/.test(data)) {
             // queue.push(data);
-            console.log('send', data);
+            console.log('send >> ', data);
             sendMessage(res, data);
             data = '';
           }
