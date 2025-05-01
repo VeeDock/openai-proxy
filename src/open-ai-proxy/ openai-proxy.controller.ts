@@ -74,26 +74,40 @@ export class OpenAiProxyController {
 
       const chunks: Array<any> = [];
 
+      const isStream =
+        response.headers['content-type']?.indexOf('text/event-stream') != -1;
+
       // res.setHeader('Connection', 'keep-alive');
       // response.headers['content-type'] = 'text/event-stream';
       res.writeHead(response.statusCode || 500, response.headers);
+      if (isStream) {
+        res.flushHeaders();
+      }
 
-      res.flushHeaders();
       //
       // // response.pipe(res, { end: true });
       // // response.pipe(process.stdout);
       //
       response.on('data', function (chunk) {
-        chunks.push(chunk);
+        if (!isStream) {
+          chunks.push(chunk);
+        } else {
+          console.log('chunk', chunk.toString());
+          res.write(chunk.toString());
+        }
+
         // console.log('data..', chunk.toString());
         // res.write('data: ' + chunk.toString());
         // res.write('data: memessage\n\n');
-        res.write(chunk.toString());
-        (res as any).flush?.();
       });
       // //
       response.on('end', function () {
         console.log('ended!');
+        if (!isStream) {
+          const body = Buffer.concat(chunks);
+          // res.json(body);
+          res.write(body.toString());
+        }
         // res.json();
         res.end();
         // const body = Buffer.concat(chunks);
@@ -125,9 +139,9 @@ export class OpenAiProxyController {
         .json({ error: 'Proxy request failed', details: err.message });
     });
 
-    request.on('close', () => {
-      console.log('request closed');
-    });
+    // request.on('close', () => {
+    //   console.log('request closed');
+    // });
 
     if (req.body) {
       request.write(JSON.stringify(req.body));
