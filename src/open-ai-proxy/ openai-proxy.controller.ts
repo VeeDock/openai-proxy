@@ -84,6 +84,8 @@ export class OpenAiProxyController {
       res.writeHead(response.statusCode || 500, response.headers);
       if (isStream) {
         res.flushHeaders();
+        response.pipe(res);
+        return;
       }
 
       //
@@ -94,7 +96,7 @@ export class OpenAiProxyController {
         if (!isStream) {
           chunks.push(chunk);
         } else {
-          response.pipe(res);
+          // response.pipe(res);
           // console.log('chunk', chunk.toString());
           // setInterval(() => {
           //   res.write('event: ev\n');
