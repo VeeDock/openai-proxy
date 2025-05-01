@@ -39,7 +39,7 @@ export class OpenAiProxyController {
   constructor() {}
 
   @All('*proxy')
-  async proxy(@Req() req: Request, @Res({ passthrough: true }) res: Response) {
+  async proxy(@Req() req: Request, @Res() res: Response) {
     const path = req.url;
 
     console.log('method', req.method);
@@ -70,7 +70,7 @@ export class OpenAiProxyController {
         res
           .status(response.statusCode || 500)
           .setHeaders(normalizeHeaders(response.headers));
-        response.pipe(res, { end: true });
+        // response.pipe(res, { end: true });
         resolve(response);
         return;
         const chunks: Array<any> = [];
@@ -152,30 +152,30 @@ export class OpenAiProxyController {
     //   }, 1000);
     // });
     //
-    // response.on('data', function (chunk) {
-    //   chunks.push(chunk);
-    //   console.log('data..', chunk.toString());
-    //   // res.write(chunk);
-    // });
-    // //
-    // response.on('end', function () {
-    //   console.log('ended!');
-    //   // res.json();
-    //   const body = Buffer.concat(chunks);
-    //   // console.log(body.toString());
-    //   // console.log('headers', response.headers);
-    //   let data = body.toString();
-    //   try {
-    //     data = JSON.parse(data);
-    //   } catch {
-    //     /* empty */
-    //   }
-    //   // console.log('method', typeof data === 'string' ? 'send' : 'json');
-    //   res[typeof data === 'string' ? 'send' : 'json'](data);
-    // });
-    // //
-    // response.on('error', function (error) {
-    //   console.error(error);
-    // });
+    response.on('data', function (chunk) {
+      chunks.push(chunk);
+      console.log('data..', chunk.toString());
+      // res.write(chunk);
+    });
+    //
+    response.on('end', function () {
+      console.log('ended!');
+      // res.json();
+      const body = Buffer.concat(chunks);
+      // console.log(body.toString());
+      // console.log('headers', response.headers);
+      let data = body.toString();
+      try {
+        data = JSON.parse(data);
+      } catch {
+        /* empty */
+      }
+      // console.log('method', typeof data === 'string' ? 'send' : 'json');
+      res[typeof data === 'string' ? 'send' : 'json'](data);
+    });
+    //
+    response.on('error', function (error) {
+      console.error(error);
+    });
   }
 }
