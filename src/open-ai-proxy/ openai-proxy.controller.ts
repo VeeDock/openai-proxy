@@ -65,13 +65,14 @@ export class OpenAiProxyController {
     }
 
     const request = https.request(options, function (response) {
-      // res
-      //   .status(response.statusCode || 500)
-      //   .setHeaders(normalizeHeaders(response.headers));
-      response.pipe(res);
+      res
+        .status(response.statusCode || 500)
+        .setHeaders(normalizeHeaders(response.headers));
+      res.flushHeaders();
+      // response.pipe(res);
       // res.flushHeaders();
 
-      // const chunks: Array<any> = [];
+      const chunks: Array<any> = [];
       //
       // // res.writeHead(response.statusCode || 500, response.headers);
       // // res.flushHeaders();
@@ -79,11 +80,12 @@ export class OpenAiProxyController {
       // // response.pipe(res, { end: true });
       // // response.pipe(process.stdout);
       //
-      // response.on('data', function (chunk) {
-      //   chunks.push(chunk);
-      //   console.log('data..', chunk.toString());
-      //   // res.write(chunk);
-      // });
+      response.on('data', function (chunk) {
+        chunks.push(chunk);
+        console.log('data..', chunk.toString());
+        res.write(chunk);
+        // res.wr
+      });
       // //
       // response.on('end', function () {
       //   console.log('ended!');
