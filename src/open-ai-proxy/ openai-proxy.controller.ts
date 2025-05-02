@@ -22,8 +22,9 @@ import * as https from 'node:https';
 // }
 
 function sendMessage(res: Response, mes: string) {
+  console.log('sending', new Date());
   const ok = res.write(mes, (err) => {
-    console.log('write result', err);
+    console.log('write result', err, new Date());
   });
   if (!ok) {
     res.once('drain', () => {
