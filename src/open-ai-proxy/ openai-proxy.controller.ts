@@ -1,7 +1,10 @@
-import { Controller, Req, Res, All } from '@nestjs/common';
+import { Controller, Req, Res, All, BadRequestException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import * as https from 'node:https';
 import * as http from 'node:http';
+import { HttpService } from '@nestjs/axios';
+import { AxiosRequestConfig } from 'axios';
+import { Readable } from 'node:stream';
 
 function normalizeHeaders(
   headers: http.IncomingHttpHeaders,
@@ -24,6 +27,20 @@ function normalizeHeaders(
   return normalized;
 }
 
+function webStreamToNodeReadable(webStream: ReadableStream): Readable {
+  const reader = webStream.getReader();
+  return new Readable({
+    async read() {
+      const { done, value } = await reader.read();
+      if (done) {
+        this.push(null);
+      } else {
+        this.push(Buffer.from(value));
+      }
+    },
+  });
+}
+
 function sendMessage(res: Response, mes: string) {
   console.log('sending', new Date());
   const ok = res.write(mes, (err) => {
@@ -39,12 +56,64 @@ function sendMessage(res: Response, mes: string) {
 
 @Controller('v1')
 export class OpenAiProxyController {
-  // private readonly openaiBase = 'https://api.openai.com';
+  private readonly openaiBase = 'https://api.openai.com';
   private readonly openaiHost = 'api.openai.com';
 
-  constructor() {}
+  constructor(private readonly httpService: HttpService) {}
 
-  @All('*proxy')
+  @All('*proxynew')
+  async proxyNew(@Req() req: Request, @Res() res: Response) {
+    const path = req.url;
+
+    console.log('method', req.method);
+    console.log('url', path);
+    console.log('body', req.body);
+
+    // const isStream = req.headers.accept === 'text/event-stream';
+
+    const options: AxiosRequestConfig = {
+      method: req.method,
+      url: this.openaiBase + path,
+      headers: req.headers,
+      // maxRedirects: 20,
+      data: req.body,
+      validateStatus: () => true,
+    };
+
+    if (!options.url) {
+      throw new BadRequestException('No url provided');
+    }
+
+    console.log('options:', options);
+
+    const response = await fetch(options.url, {
+      method: req.method,
+      headers: Object.fromEntries(normalizeHeaders(req.headers)),
+    });
+
+    console.log('response', response);
+
+    res.status(response.status);
+    response.headers.forEach((value, key) => {
+      if (
+        !['content-encoding', 'content-length', 'transfer-encoding'].includes(
+          key.toLowerCase(),
+        )
+      ) {
+        res.setHeader(key, value);
+      }
+    });
+    // const rawHeaders = response.headers.toJSON;
+    // console.log('raw', rawHeaders);
+    if (response.body) {
+      const nodeReadable = webStreamToNodeReadable(response.body);
+      nodeReadable.pipe(res);
+    } else {
+      res.send();
+    }
+  }
+
+  @All('test/*proxy')
   proxy(@Req() req: Request, @Res() res: Response) {
     const path = req.url;
 
