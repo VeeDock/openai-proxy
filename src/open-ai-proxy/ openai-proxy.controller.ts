@@ -129,6 +129,7 @@ export class OpenAiProxyController {
         if (!isStream) {
           const body = Buffer.concat(chunks);
           try {
+            console.log('sending json...');
             res.json(JSON.parse(body.toString()));
           } catch {
             res.send(body.toString());
