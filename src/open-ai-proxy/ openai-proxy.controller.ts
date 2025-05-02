@@ -84,7 +84,7 @@ export class OpenAiProxyController {
       throw new BadRequestException('No url provided');
     }
 
-    console.log('options:', options);
+    // console.log('options:', options);
 
     const response = await fetch(options.url, {
       method: req.method,
