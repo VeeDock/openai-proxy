@@ -125,7 +125,7 @@ export class OpenAiProxyController {
       });
       // //
       response.on('end', function () {
-        console.log('ended!');
+        // console.log('ended!');
         if (!isStream) {
           const body = Buffer.concat(chunks);
           try {
