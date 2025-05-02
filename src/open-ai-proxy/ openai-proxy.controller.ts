@@ -1,25 +1,28 @@
 import { Controller, Req, Res, All } from '@nestjs/common';
 import { Request, Response } from 'express';
 import * as https from 'node:https';
+import * as http from 'node:http';
 
-// function normalizeHeaders(headers: IncomingHttpHeaders): Map<string, string> {
-//   const normalized: Map<string, string> = new Map();
-//
-//   for (const [key, value] of Object.entries(headers)) {
-//     if (typeof value === 'string') {
-//       normalized[key] = value;
-//       normalized.set(key, value);
-//     } else if (Array.isArray(value)) {
-//       normalized[key] = value.join(','); // или берёшь value[0], если нужен один
-//       normalized.set(key, value.join(','));
-//     } else if (typeof value === 'number') {
-//       // normalized[key] = value.toString();
-//       normalized.set(key, value);
-//     }
-//   }
-//
-//   return normalized;
-// }
+function normalizeHeaders(
+  headers: http.IncomingHttpHeaders,
+): Map<string, string> {
+  const normalized: Map<string, string> = new Map();
+
+  for (const [key, value] of Object.entries(headers)) {
+    if (typeof value === 'string') {
+      normalized[key] = value;
+      normalized.set(key, value);
+    } else if (Array.isArray(value)) {
+      normalized[key] = value.join(','); // или берёшь value[0], если нужен один
+      normalized.set(key, value.join(','));
+    } else if (typeof value === 'number') {
+      // normalized[key] = value.toString();
+      normalized.set(key, value);
+    }
+  }
+
+  return normalized;
+}
 
 function sendMessage(res: Response, mes: string) {
   console.log('sending', new Date());
@@ -84,9 +87,13 @@ export class OpenAiProxyController {
 
       // res.setHeader('Connection', 'keep-alive');
       // response.headers['content-type'] = 'text/event-stream';
-      res.writeHead(response.statusCode || 500, response.headers);
+
       if (isStream) {
+        res.writeHead(response.statusCode || 500, response.headers);
         res.flushHeaders();
+      } else {
+        res.status(response.statusCode || 500);
+        res.setHeaders(normalizeHeaders(response.headers));
       }
 
       //
@@ -121,11 +128,18 @@ export class OpenAiProxyController {
         console.log('ended!');
         if (!isStream) {
           const body = Buffer.concat(chunks);
-          // res.json(body);
-          res.write(body);
+          try {
+            res.json(JSON.parse(body.toString()));
+          } catch {
+            res.send(body.toString());
+          }
+
+          // res.write(body);
+        } else {
+          res.end();
         }
         // res.json();
-        res.end();
+
         // const body = Buffer.concat(chunks);
         // // console.log(body.toString());
         // // console.log('headers', response.headers);
