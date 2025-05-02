@@ -130,7 +130,9 @@ export class OpenAiProxyController {
           const body = Buffer.concat(chunks);
           try {
             console.log('sending json...');
-            res.json(JSON.parse(body.toString()));
+            res.json(JSON.parse(body.toString())).end(() => {
+              console.log('response sent');
+            });
           } catch {
             res.send(body.toString());
           }
