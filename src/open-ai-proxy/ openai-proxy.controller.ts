@@ -105,13 +105,13 @@ export class OpenAiProxyController {
     });
     // const rawHeaders = response.headers.toJSON;
     // console.log('raw', rawHeaders);
-    res.json(await response.json());
-    // if (response.body) {
-    //   const nodeReadable = webStreamToNodeReadable(response.body);
-    //   nodeReadable.pipe(res);
-    // } else {
-    //   res.send();
-    // }
+    // res.json(await response.json());
+    if (response.body) {
+      const nodeReadable = webStreamToNodeReadable(response.body);
+      nodeReadable.pipe(res);
+    } else {
+      res.send();
+    }
   }
 
   @All('test/*proxy')
