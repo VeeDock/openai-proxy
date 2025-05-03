@@ -89,6 +89,7 @@ export class OpenAiProxyController {
     const response = await fetch(options.url, {
       method: req.method,
       headers: Object.fromEntries(normalizeHeaders(req.headers)),
+      body: req.body || undefined,
     });
 
     console.log('response', response);
