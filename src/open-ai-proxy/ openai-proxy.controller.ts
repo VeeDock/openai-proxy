@@ -106,6 +106,7 @@ export class OpenAiProxyController {
     // const rawHeaders = response.headers.toJSON;
     // console.log('raw', rawHeaders);
     const data = await response.json();
+    console.log('data', data);
     res.json(data);
     // if (response.body) {
     //   const nodeReadable = webStreamToNodeReadable(response.body);
