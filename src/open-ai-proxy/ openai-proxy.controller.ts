@@ -12,6 +12,9 @@ function normalizeHeaders(
   const normalized: Map<string, string> = new Map();
 
   for (const [key, value] of Object.entries(headers)) {
+    if (key.toLowerCase() == 'content-length') {
+      continue;
+    }
     if (typeof value === 'string') {
       normalized[key] = value;
       normalized.set(key, value);
