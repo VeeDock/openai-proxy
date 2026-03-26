@@ -26,6 +26,7 @@
     "@nestjs/core": "^11.0.1",
     "@nestjs/platform-express": "^11.0.1",
     "axios": "^1.9.0",
+    "express": "^5.1.0",
     "follow-redirects": "^1.15.9",
     "openai": "^4.96.2",
     "reflect-metadata": "^0.2.2",
